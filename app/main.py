@@ -35,10 +35,7 @@ def requires_safe(model_name_or_path: str) -> bool:
         "Llama-2-13b-hf",
         "Llama-2-13b-chat-hf",
     ]
-    if any(key in model_name_or_path for key in safe_keys):
-        return True
-    else:
-        return False
+    return any((key in model_name_or_path for key in safe_keys))
 
 
 def ct_preprocess(model_name_or_path, model_path):
@@ -107,7 +104,7 @@ async def startup():
         model = ctranslate2.Generator
     elif model_type == "SEQ2SEQ":
         model = ctranslate2.Translator
-    logger.info(f"Optimizing {model_type} model: " + loader.local_save_file)
+    logger.info(f"Optimizing {model_type} model: {loader.local_save_file}")
 
     target_save_file = os.path.join(
         "/code/models", loader.local_save_file, "ct_output_models"
@@ -246,16 +243,12 @@ def generate_helper(
 
     step_results = generator.generate_tokens(prompt_tokens, **params)
 
-    result = ""
-    for step_result in step_results:
-        # this is for llama tokenizer to decode with space
-        if step_result.token.startswith("▁"):
-            result += " " + tokenizer.decode(
-                step_result.token_id
-            )  # pre pend a whitie space
-        else:
-            result += tokenizer.decode(step_result.token_id)
-    return result
+    return "".join(
+        " " + tokenizer.decode(step_result.token_id)
+        if step_result.token.startswith("▁")
+        else tokenizer.decode(step_result.token_id)
+        for step_result in step_results
+    )
 
 
 @app.post("/generate_stream")
