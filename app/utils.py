@@ -7,7 +7,7 @@ import logging
 def get_logger(name):
     logger = logging.getLogger(name)
     LOG_LEVEL = settings.log_level
-    if not LOG_LEVEL in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+    if LOG_LEVEL not in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
         logger.critical(f"Invalid log level {LOG_LEVEL}. Setting to INFO")
         LOG_LEVEL = "INFO"
 
